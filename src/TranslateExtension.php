@@ -8,6 +8,7 @@ use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Bolt\Extension\Verraedt\Translate\Controller\I18nFrontend;
+use Bolt\Extension\Verraedt\Translate\Controller\I18nRequirement;
 
 /**
  * ExtensionName extension class.
@@ -28,5 +29,13 @@ class TranslateExtension extends SimpleExtension
                 return $frontend;
             }
         );
+
+        $app['controller.i18n_requirement'] = $app->share(
+            function ($app) {
+                $requirement = new I18nRequirement($app['config']);
+                return $requirement;
+            }
+        );
+
     }
 }

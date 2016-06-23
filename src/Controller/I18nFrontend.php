@@ -3,11 +3,8 @@
 namespace Bolt\Extension\Verraedt\Translate\Controller;
 
 use Silex\Application;
-use Silex\ControllerCollection;
-use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Bolt\Controller\Frontend;
 
 class I18nFrontend extends Frontend 
