@@ -18,21 +18,22 @@ Translate Extension
    * Replace all occurances of `controller.frontend` by `i18n_controller.frontend`.
    * Add the parameter `{_locale}` to each path, and add the requirement `_locale: i18n_controller.requirement:anyLocale` to each item:
 
-          [...]
-          contentlink:
-              path: '/{_locale}/{contenttypeslug}/{slug}'
-              defaults:
-                  _controller: i18n_controller.frontend:record
-              requirements:
-                  contenttypeslug: i18n_controller.requirement:anyContentType
-                  _locale: i18n_controller.requirement:anyLocale
-          [...]
+           [...]
+           contentlink:
+               path: '/{_locale}/{contenttypeslug}/{slug}'
+               defaults:
+                   _controller: i18n_controller.frontend:record
+               requirements:
+                   contenttypeslug: i18n_controller.requirement:anyContentType
+                   _locale: i18n_controller.requirement:anyLocale
+           [...]
+
    * Add a new route for `/`, redirecting visitors to the right language: 
 
-          redirect:
-              path: /
-              defaults:
-                  _controller: i18n_controller.frontend:redirectLanguage
+           redirect:
+               path: /
+               defaults:
+                   _controller: i18n_controller.frontend:redirectLanguage
 
     Example configuration after these changes:
 
