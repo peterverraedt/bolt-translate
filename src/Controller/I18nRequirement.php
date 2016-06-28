@@ -19,6 +19,13 @@ class I18nRequirement extends Requirement
      */
     public function anyLocale()
     {
-        return $this->configAssert('general/locales', false);
+        $locales = $this->config->get('general/locales');
+        $accepted = array();
+        foreach ($locales as $locale => $info) {
+            $accepted[] = $info['slug'];
+            $accepted[] = $locale; // XXX Fallback
+        }
+
+        return implode('|', $accepted);
     }
 } 

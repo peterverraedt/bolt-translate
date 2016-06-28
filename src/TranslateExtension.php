@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Bolt\Extension\Verraedt\Translate\Controller\I18nFrontend;
 use Bolt\Extension\Verraedt\Translate\Controller\I18nRequirement;
+use Bolt\Extension\Verraedt\Translate\Controller\BackendController;
 
 /**
  * ExtensionName extension class.
@@ -22,7 +23,7 @@ class TranslateExtension extends SimpleExtension
      */
     protected function registerServices(Application $app)
     {
-        $app['controller.i18n_frontend'] = $app->share(
+        $app['i18n_controller.frontend'] = $app->share(
             function ($app) {
                 $frontend = new I18nFrontend();
                 $frontend->connect($app);
@@ -30,12 +31,22 @@ class TranslateExtension extends SimpleExtension
             }
         );
 
-        $app['controller.i18n_requirement'] = $app->share(
+        $app['i18n_controller.requirement'] = $app->share(
             function ($app) {
                 $requirement = new I18nRequirement($app['config']);
                 return $requirement;
             }
         );
 
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerBackendControllers()
+    {
+        return [
+        #    '/' => new BackendController(),
+        ];
     }
 }
