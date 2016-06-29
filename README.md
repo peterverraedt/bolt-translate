@@ -1,7 +1,7 @@
 Translate Extension
 ===================
 
-# Usage
+## Setup
 
 1. Install the extension under `extensions/local/verraedt/translate`.
 2. Add the `locales` block to the main configuration with your locales, the first one is the default locale. Do not remove the setting `locale`.
@@ -88,13 +88,6 @@ Translate Extension
                 contenttypeslug: i18n_controller.requirement:pluralContentTypes
                 _locale: i18n_controller.requirement:anyLocale
 
-4. Change the field types for translated fields in `contenttypes.yml` into `i18n_{original fieldtype}`. 
+4. Change the field types for translated fields in `contenttypes.yml` into `i18n` and put the original fieldtype under the key `subtype`. For supported field types, see below.
 
-    Supported types:
- 
-    | Original field type | Translated field type |
-    | ------------------- | --------------------- |
-    | `text`              | `i18n_text`           |
-    | _Other types_       | _Unsupported_         |
- 
-
+5. Do a database update.
