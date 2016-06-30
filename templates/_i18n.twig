@@ -1,6 +1,0 @@
-{% set localefieldvals = context.content.get(contentkey) %}
-{% set locales = app['config'].get('general/locales') %}
-
-{% for locale, info in locales %}
-    {{ include('@bolt/_i18n-locale.twig', {'content': localefieldvals, 'locale': locale, 'locale_slug': info.slug, 'locale_label': info.label}) }}
-{% endfor %}

@@ -7,6 +7,7 @@ use Bolt\Storage\NamingStrategy;
 use Bolt\Storage\QuerySet;
 use Bolt\Storage\Field\Type\FieldTypeBase;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\Common\Collections\ArrayCollection;
 use Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation;
 
@@ -208,7 +209,15 @@ class I18nType extends FieldTypeBase
     public function getStorageType() 
     {
         // Dummy field, is actually unused, but provide it anyway to fix some trouble.
+//        return Type::getType('text');
         return 'text';
+    }
+
+    public function getStorageOptions()
+    {
+        return [
+            'default' => '',
+        ];
     }
 
 
@@ -315,6 +324,6 @@ class I18nType extends FieldTypeBase
      */
     public function getTemplate() 
     {
-        return '@bolt/_i18n.twig';
+        return '@bolt/editcontent/fields/_i18n.twig';
     }
 }
