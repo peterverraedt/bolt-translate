@@ -88,6 +88,8 @@ Translate Extension
                 contenttypeslug: i18n_controller.requirement:pluralContentTypes
                 _locale: i18n_controller.requirement:anyLocale
 
-4. Change the field types for translated fields in `contenttypes.yml` into `i18n` and put the original fieldtype under the key `subtype`. For supported field types, see below.
+4. Add `i18n: true` to each field that should be translated. Currently supported fields:
+   * `text`
+   * `html`
 
 5. Do a database update.
