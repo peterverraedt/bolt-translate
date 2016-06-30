@@ -1,4 +1,7 @@
 <div class="language-group locale-{{ locale_slug }}">
+    {% set type = {
+        type: field.subtype
+    } %}
     {% set defaults = {
         class:      '',
         label:      '',
@@ -6,11 +9,11 @@
         canUpload:  field.canUpload,
         default:    null
     } %}
-    {% set rfield = defaults|merge(field) %}
+    {% set rfield = defaults|merge(field)|merge(type) %}
 
     {% set rcontext = {
-        'key':        default_locale ? name : name ~ '-' ~ locale_slug,
-        'name':       default_locale ? name : name ~ '_translations[' ~ locale ~ ']',
+        'key':        name ~ '-' ~ locale_slug,
+        'name':       name ~ '[' ~ locale ~ ']',
         'contentkey': locale,
         'field':      rfield,
         'labelkey':   rfield.label|default(name|ucfirst) ~ ' (' ~ locale_label ~ ')',
@@ -26,7 +29,7 @@
         </div>
     {% endif %}
 
-    {{ include('@bolt/editcontent/fields/_' ~ field.type ~ '.twig', rcontext) }}
+    {{ include(context.fields[rfield.type].template, rcontext) }}
 
     {# Postfix #}
     {% if rcontext.field.postfix is defined and rcontext.field.postfix is not empty %}

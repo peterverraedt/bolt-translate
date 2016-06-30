@@ -1,6 +1,12 @@
+{% if field.i18n %} 
+
 {% set localefieldvals = context.content.get(contentkey) %}
 {% set locales = app['config'].get('general/locales') %}
 
 {% for locale, info in locales %}
-    {{ include('@bolt/editcontent/fields/_i18n-locale.twig', {'content': localefieldvals, 'locale': locale, 'locale_slug': info.slug, 'locale_label': info.label}) }}
+    {{ include('@bolt/editcontent/fields/_i18n-locale.twig', {'content': localefieldvals, 'locale': locale, 'locale_slug': info.slug, 'locale_label': info.label, 'default_locale': loop.index == 1}) }}
 {% endfor %}
+  
+{% else %}
+{{ include('@bolt/editcontent/fields/_' ~ field.type ~ '.twig', context) }}
+{% endif %}

@@ -8,8 +8,8 @@ use Bolt\Storage\QuerySet;
 use Bolt\Storage\Field\Type\FieldTypeBase;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\Common\Collections\ArrayCollection;
 use Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation;
+use Bolt\Extension\Verraedt\Translate\Storage\Field\TranslatedFieldCollection;
 
 /**
  * This is one of a suite of basic Bolt field transformers that handles
@@ -62,7 +62,7 @@ class I18nType extends FieldTypeBase
         $key = $this->mapping['fieldname'];
         $values = $entity->get($key);
 
-        if ($values instanceof ArrayCollection) {
+        if ($values instanceof TranslatedFieldCollection) {
             $values = $values->toArray();
         }
 
@@ -101,32 +101,53 @@ class I18nType extends FieldTypeBase
         // Save values in the repository
         $repo = $this->em->getRepository('Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation');
 
-        $existing_fields = $repo->getExistingFields( $entity->getId(), $entity->getContenttype(), $key);
+        $existing_fields = $repo->getExistingFields($entity->getId(), $entity->getContenttype(), $key);
 
-        foreach (array_intersect_key($existing_fields, $values) as $locale => $existing_field_id) {
-            $existing_field = $repo->find($existing_field_id);
+        $queries->onResult(
+            function ($query, $result, $id) use ($repo, $existing_fields, $values, $type, $entity, $key) {
+                foreach (array_intersect_key($existing_fields, $values) as $locale => $existing_field_id) {
+                    $existing_field = $repo->find($existing_field_id);
 
-            $existing_field->setValue($values[$locale], $type->getName());
-            $repo->save($existing_field);
+                    $existing_field->setValue($values[$locale], $type->getName());
+                    $repo->save($existing_field);
 
-            unset($values[$locale]);
-            unset($existing_fields[$locale]);
-        }
+                    unset($values[$locale]);
+                    unset($existing_fields[$locale]);
+                }
 
-        foreach ($values as $locale => $new_value) {
-            $field = new FieldTranslation();
-            $field->setLocale($locale);
-            $field->setFieldname($key);
-            $field->setFieldtype($type->getName());
-            $field->setContenttype((string) $entity->getContenttype());
-            $field->setContent_id($entity->getId());
-            $field->setValue($new_value, $type->getName());
-            $repo->save($field);
-        }
+                foreach ($values as $locale => $new_value) {
+                    $field = new FieldTranslation();
+                    $field->setLocale($locale);
+                    $field->setFieldname($key);
+                    $field->setFieldtype($type->getName());
+                    $field->setContenttype((string) $entity->getContenttype());
+                    $field->setContent_id($id);
+                    $field->setValue($new_value, $type->getName());
+                    $repo->save($field);
+                }
 
-        foreach ($existing_fields as $old_field_id) {
-            $repo->delete($repo->find($old_field_id));
-        }
+                foreach ($existing_fields as $old_field_id) {
+                    $repo->delete($repo->find($old_field_id));
+                }
+        
+                // Save dummy field for situations where load() is not called
+                $saved_field_ids = $repo->getExistingFields($id, $entity->getContenttype(), $key);
+                if ($saved_field_ids) {
+                    $saved_field_pairs = array();
+                    foreach ($saved_field_ids as $locale => $fieldid) {
+                        $saved_field_pairs[] = $locale . '_' . $fieldid;
+                    }
+                    $saved_field_string = '{' . implode(',', $saved_field_pairs) . '}';
+                }
+                else {
+                    $saved_field_string = '{NULL}';
+                }
+
+                global $app;
+                // TODO: Cleanup
+                $app['db']->executeUpdate('UPDATE bolt_' . $entity->getContenttype() . ' SET ' . $key . ' = ? WHERE id = ?', array($saved_field_string, $id));
+            }
+        );
     }
 
     /**
@@ -158,19 +179,27 @@ class I18nType extends FieldTypeBase
             $type = $handler->getStorageType();
         }
         else {
-            $type = 'string'; // Good guess
+            $type = NULL;
         }
 
         // Find entries in repository
         $repo = $this->em->getRepository('Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation');
 
-        $parse = (string) $data[$key];
-        if (substr($parse, 0, 1) == '{') {
-            $parse = substr($parse, 1, -1);
+        // Try to lookup from data
+        if (!is_null($data[$key])) {
+            $parse = (string) $data[$key];
+            if (substr($parse, 0, 1) == '{') {
+                $parse = substr($parse, 1, -1);
+            }
+            $ids = explode(',', $parse);
+        }
+        else {
+            //$ids = $repo->getExistingFields($entity->getId(), $entity->getContenttype(), $key);
+            $ids = array();
         }
         
         $values = [];
-        foreach (explode(',', $parse) as $fieldKey) {
+        foreach ($ids as $fieldKey) {
             if ($fieldKey != 'Array') {
                 $split = explode('_', $fieldKey);
                 $id = array_pop($split);
@@ -181,16 +210,22 @@ class I18nType extends FieldTypeBase
                 
                     $field = $repo->find($id);
                     if ($field) {
-                        $val = $field->getValue($type->getName());
-                        if ($val !== null) {
-                            $values[$locale] = $type->convertToPHPValue($val, $this->getPlatform());
+                        if (is_null($type)) {
+                            // TODO Fix
+                            $values[$locale] = $field->getValue();
+                        }
+                        else {
+                            $val = $field->getValue($type->getName());
+                            if ($val !== null) {
+                                $values[$locale] = $type->convertToPHPValue($val, $this->getPlatform());
+                            }
                         }
                     }
                 }
             }
         }
-        
-        $collection = new ArrayCollection($values);
+       
+        $collection = new TranslatedFieldCollection($values);
 
         $this->set($entity, $collection);
     }
@@ -324,6 +359,6 @@ class I18nType extends FieldTypeBase
      */
     public function getTemplate() 
     {
-        return '@bolt/editcontent/fields/_i18n.twig';
+        return '@bolt/editcontent/fields/_i18n.old.twig';
     }
 }

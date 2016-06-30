@@ -8,14 +8,15 @@ use Silex\Application;
 use Silex\ControllerCollection;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Bolt\Storage\FieldManager;
 use Bolt\Storage\Field\Base;
 use Bolt\Extension\Verraedt\Translate\Controller\I18nFrontend;
 use Bolt\Extension\Verraedt\Translate\Controller\I18nRequirement;
 use Bolt\Extension\Verraedt\Translate\Controller\BackendController;
 use Bolt\Extension\Verraedt\Translate\Storage\Database\Schema\Table\FieldTranslation;
-
-use Bolt\Storage\FieldManager;
 use Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nType;
+use Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nTextType;
+use Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nHtmlType;
 
 /**
  * ExtensionName extension class.
@@ -50,6 +51,8 @@ class TranslateExtension extends SimpleExtension
             $app['storage.typemap'],
             [
                 'i18n' => 'Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nType',
+                'text' => 'Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nTextType',
+                'html' => 'Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nHtmlType',
             ]
         );
 
@@ -59,12 +62,8 @@ class TranslateExtension extends SimpleExtension
                 function (FieldManager $manager) use ($app) {
                     // Modify FieldManager
                     $manager->addFieldType('i18n', new I18nType());
+                    $manager->addFieldType('text', new I18nTextType());
 
-                    // Modify Field\Manager
-                    $field = new Base('i18n', '@bolt/_i18n.twig');
-                    //$app['config']->getFields()->addField($field);
-//                    $app['config']->getFields()->addDummyField('i18n');
-                    
                     return $manager;
                 }
             )
@@ -72,6 +71,7 @@ class TranslateExtension extends SimpleExtension
 
         $this->extendDatabaseSchemaServices();
 
+        $app['storage']->getMapper()->setDefaultAlias('bolt_field_translation', 'Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation');
         $app['storage']->setRepository('Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation', 'Bolt\Extension\Verraedt\Translate\Storage\Repository\FieldTranslationRepository');
     }
 
