@@ -5,6 +5,7 @@ use Bolt\Exception\FieldConfigurationException;
 use Bolt\Storage\Mapping\ClassMetadata;
 use Bolt\Storage\NamingStrategy;
 use Bolt\Storage\QuerySet;
+use Bolt\Storage\Query\QueryInterface;
 use Bolt\Storage\Field\Type\FieldTypeBase;
 use Doctrine\DBAL\Query\QueryBuilder;
 use Doctrine\DBAL\Types\Type;
@@ -30,7 +31,10 @@ abstract class I18nTypeBase extends FieldTypeBase
      */
     public function load(QueryBuilder $query, ClassMetadata $metadata)
     {
-        if (isset($this->mapping['data']) && isset($this->mapping['data']['i18n']) && $this->mapping['data']['i18n']) {
+        // If entity
+        $i18n_enabled = isset($this->mapping['data']) && isset($this->mapping['data']['i18n']) && $this->mapping['data']['i18n'];
+
+        if ($i18n_enabled) {
             $field = $this->mapping['fieldname'];
             $boltname = $metadata->getBoltName();
 
@@ -55,10 +59,20 @@ abstract class I18nTypeBase extends FieldTypeBase
                 );
         }
     }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function query(QueryInterface $query, ClassMetadata $metadata)
+    {
+    }
 
     public function persist(QuerySet $queries, $entity, EntityManager $em = null)
     {
-        if (isset($this->mapping['data']) && isset($this->mapping['data']['i18n']) && $this->mapping['data']['i18n']) {
+        // If entity
+        $i18n_enabled = isset($this->mapping['data']) && isset($this->mapping['data']['i18n']) && $this->mapping['data']['i18n'];
+        
+        if ($i18n_enabled) {
             // Get value from form
             $key = $this->mapping['fieldname'];
 
@@ -132,9 +146,35 @@ abstract class I18nTypeBase extends FieldTypeBase
      */
     public function hydrate($data, $entity)
     {
-        if (isset($this->mapping['data']) && isset($this->mapping['data']['i18n']) && $this->mapping['data']['i18n']) {
-            $key = $this->mapping['fieldname'];
+        global $app;
 
+        $key = $this->mapping['fieldname'];
+
+        // If entity
+        $i18n_enabled = isset($this->mapping['data']) && isset($this->mapping['data']['i18n']) && $this->mapping['data']['i18n'];
+
+        if (isset($data[$key . '_translations'])) {
+            $i18n_enabled = TRUE; // All Fine
+        }
+        elseif (is_null($entity->getContenttype())) {
+            // XXX Vuile hack (TM) XXX
+            $backtrace = debug_backtrace()[1];
+            if ($backtrace['class'] == 'Bolt\Legacy\Content' && $backtrace['function'] == 'setValue') {
+                $object = $backtrace['object'];
+
+                $entity->setContenttype($object->contenttype['tablename']);
+                $entity->setId($object->id);
+            }
+            // XXX Vuile hack (TM) XXX
+        }
+
+        // If mapping is missing, but contenntype is present, find out i18n_enabled using contenttype and global configuration
+        if (!$i18n_enabled && !isset($this->mapping['data']) && !is_null($entity->getContenttype())) {
+            $contenttype_info = $app['config']->get('contenttypes/' . $entity->getContenttype(), NULL);
+            $i18n_enabled = isset($contenttype_info['fields'][$key]['i18n']) && $contenttype_info['fields'][$key]['i18n'];
+        }
+
+        if ($i18n_enabled) {
             // Find out about the storage type of the field
             $type = $this->getStorageType();
 
@@ -142,35 +182,45 @@ abstract class I18nTypeBase extends FieldTypeBase
             $repo = $this->em->getRepository('Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation');
 
             // Try to lookup from data
-            $parse = (string) $data[$key . '_translations'];
-            if (substr($parse, 0, 1) == '{') {
-                $parse = substr($parse, 1, -1);
+            $ids = array();
+
+            if (isset($data[$key . '_translations'])) {
+                $parse = (string) $data[$key . '_translations'];
+                if (substr($parse, 0, 1) == '{') {
+                    $parse = substr($parse, 1, -1);
+                }
+                $ids_pairs = explode(',', $parse);
+
+                foreach ($ids_pairs as $fieldKey) {
+                    if ($fieldKey != 'Array') {
+                        $split = explode('_', $fieldKey);
+                        $id = array_pop($split);
+                        $locale = join('_', $split);
+                        
+                        if (is_numeric($id)) {
+                            $ids[$locale] = (int) $id;
+                        }
+                    }
+                }
             }
-            $ids = explode(',', $parse);
+            else {
+                // Try to lookup from repo
+                $ids = $repo->getExistingFields($entity->getId(), $entity->getContenttype(), $key);
+            }
         
             $values = [];
-            foreach ($ids as $fieldKey) {
-                if ($fieldKey != 'Array') {
-                    $split = explode('_', $fieldKey);
-                    $id = array_pop($split);
-                    $locale = join('_', $split);
-                    
-                    if (is_numeric($id)) {
-                        $id = (int) $id;
-                    
-                        $field = $repo->find($id);
-                        if ($field) {
-                            $val = $field->getValue($type->getName());
-                            if ($val !== null) {
-                                $values[$locale] = $type->convertToPHPValue($val, $this->getPlatform());
-                            }
-                        }
+            
+            foreach ($ids as $locale => $id) {
+                $field = $repo->find($id);
+                if ($field) {
+                    $val = $field->getValue(); //$field->getValue($type->getName());
+                    if ($val !== null) {
+                        $values[$locale] = $type->convertToPHPValue($val, $this->getPlatform());
                     }
                 }
             }
 
             // Find out default locale
-            global $app;
             $locales = array_keys($app['config']->get('general/locales'));
             $default_locale = $locales[0];
     
