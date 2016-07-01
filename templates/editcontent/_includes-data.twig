@@ -1,0 +1,58 @@
+{# General data #}
+
+{% set template_alertbox %}
+    <div id="{{ '%NOTICE_ID%' }}" class="alert alert-danger alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <label for="%FIELD_ID%">{{ __('general.phrase.field-fieldname') }}</label>
+        %MESSAGE%
+    </div>
+{% endset %}
+
+{{ data('validation.alertbox',         template_alertbox|trim) }}
+{{ data('validation.generic_msg',      __('general.phrase.required-is-or-match-pattern')) }}
+
+{{ data('editcontent.msg.change_quit', __('general.phrase.warning-unfinished-changes-loss')) }}
+{{ data('editcontent.msg.saving',      __('general.phrase.saving-ellipsis')) }}
+
+{# Process field specific includes and data #}
+
+{% for type in context.fieldtypes %}
+    {{ include('@bolt/editcontent/fielddata/_' ~ type ~ '.twig', ignore_missing = true) }}
+{% endfor %}
+
+{# Has uploads? #}
+
+{% if 'file' in context.fieldtypes or 'filelist' in context.fieldtypes or 'image' in context.fieldtypes or 'imagelist' in context.fieldtypes %}
+    {{ include('@bolt/editcontent/data/_uploads.twig') }}
+{% endif %}
+
+{# Add translation scripts #}
+{% set translation = [] %}
+{% for name,field in context.contenttype.fields %}
+{% if field.i18n %}
+{% set translation = translation|merge([True]) %}
+{% endif %}
+{% endfor %}
+{% if translation %}
+{% set locales = app['config'].get('general/locales') %}
+<script type="text/javascript">
+$(function() {
+    $('#filtertabs').append('<li style="float:right"><select id="i18nselect"></select></li>');
+{% for locale, info in locales %}
+{% if loop.index != 1 %}
+    $('.language-group.locale-{{ info.slug }}').hide();
+{% endif %}
+    $('#i18nselect').append('<option value="{{ info.slug }}">{{ info.label }}</option>');
+{% endfor %}
+
+    $('#i18nselect').change(function() {
+        $('.language-group').hide();
+        $('.language-group.locale-' + $('#i18nselect').val()).show();
+    });
+});
+
+
+
+
+</script>
+{% endif %}
