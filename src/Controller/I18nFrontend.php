@@ -43,9 +43,7 @@ class I18nFrontend extends Frontend
      *
      * @param string $_locale
      */
-    protected function setLanguage($_locale) {
-        //dump($this->app['locale']);
-
+    protected function setLanguage($_locale, $request) {
         if ($_locale) {
             $all_locales = $this->getOption('general/locales', NULL);
 
@@ -53,13 +51,15 @@ class I18nFrontend extends Frontend
             foreach ($all_locales as $id => $info) {
                 if ($info['slug'] == $_locale) {
                     $this->app['config']->set('general/locale', $id);
+                    $this->app['locale'] = $id;
                     $found = TRUE;
                 }
             }
 
+            // Fallback if locale instead of slug is used
             if (!$found && isset($all_locales[$_locale])) {
                 $this->app['config']->set('general/locale', $_locale);
-                $found = TRUE;
+                //return $this->app->redirect($all_locales[$_locale]['slug']);
             }
 
             if ($found) {
@@ -73,7 +73,10 @@ class I18nFrontend extends Frontend
      */
     public function homepage(Request $request, $_locale = '') 
     {
-        $this->setLanguage($_locale);
+        $redirect = $this->setLanguage($_locale, $request);
+        if ($redirect) {
+            return $redirect;
+        }
         return parent::homepage($request);
     }
 
@@ -82,7 +85,10 @@ class I18nFrontend extends Frontend
      */
     public function record(Request $request, $contenttypeslug, $slug = '', $_locale = '')
     {
-        $this->setLanguage($_locale);
+        $redirect = $this->setLanguage($_locale, $request);
+        if ($redirect) {
+            return $redirect;
+        }
         return parent::record($request, $contenttypeslug, $slug);
     }
     
@@ -91,7 +97,10 @@ class I18nFrontend extends Frontend
      */
     public function preview(Request $request, $contenttypeslug, $_locale = '')
     {
-        $this->setLanguage($_locale);
+        $redirect = $this->setLanguage($_locale, $request);
+        if ($redirect) {
+            return $redirect;
+        }
         return parent::preview($request, $contenttypeslug);
     }
      
@@ -100,7 +109,10 @@ class I18nFrontend extends Frontend
      */
     public function listing(Request $request, $contenttypeslug, $_locale = '')
     {
-        $this->setLanguage($_locale);
+        $redirect = $this->setLanguage($_locale, $request);
+        if ($redirect) {
+            return $redirect;
+        }
         return parent::listing($request, $contenttypeslug);
     }
      
@@ -109,7 +121,10 @@ class I18nFrontend extends Frontend
      */
     public function taxonomy(Request $request, $taxonomytype, $slug, $_locale = '')
     {
-        $this->setLanguage($_locale);
+        $redirect = $this->setLanguage($_locale, $request);
+        if ($redirect) {
+            return $redirect;
+        }
         return parent::taxonomy($request, $taxonomytype, $slug);
     }
      
@@ -118,7 +133,10 @@ class I18nFrontend extends Frontend
      */
     public function search(Request $request, array $contenttypes = null, $_locale = '')
     {
-        $this->setLanguage($_locale);
+        $redirect = $this->setLanguage($_locale, $request);
+        if ($redirect) {
+            return $redirect;
+        }
         return parent::search($request, $contenttypes);
     }
 }

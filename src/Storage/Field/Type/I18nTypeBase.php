@@ -1,6 +1,7 @@
 <?php
 namespace Bolt\Extension\Verraedt\Translate\Storage\Field\Type;
 
+use Bolt\Configuration\ResourceManager;
 use Bolt\Exception\FieldConfigurationException;
 use Bolt\Storage\Mapping\ClassMetadata;
 use Bolt\Storage\NamingStrategy;
@@ -146,7 +147,7 @@ abstract class I18nTypeBase extends FieldTypeBase
      */
     public function hydrate($data, $entity)
     {
-        global $app;
+        $app = ResourceManager::getApp();
 
         $key = $this->mapping['fieldname'];
 

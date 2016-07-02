@@ -16,6 +16,7 @@ use Bolt\Extension\Verraedt\Translate\Controller\BackendController;
 use Bolt\Extension\Verraedt\Translate\Storage\Database\Schema\Table\FieldTranslation;
 use Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nTextType;
 use Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nHtmlType;
+use Bolt\Extension\Verraedt\Translate\Menu\I18nMenuBuilder;
 
 /**
  * ExtensionName extension class.
@@ -71,6 +72,8 @@ class TranslateExtension extends SimpleExtension
 
         $app['storage']->getMapper()->setDefaultAlias('bolt_field_translation', 'Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation');
         $app['storage']->setRepository('Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation', 'Bolt\Extension\Verraedt\Translate\Storage\Repository\FieldTranslationRepository');
+
+        $app['menu'] = new I18nMenuBuilder($app);
     }
 
     /**
