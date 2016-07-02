@@ -37,22 +37,74 @@
 {% set locales = app['config'].get('general/locales') %}
 <script type="text/javascript">
 $(function() {
-    $('#filtertabs').append('<li style="float:right"><select id="i18nselect"></select></li>');
-{% for locale, info in locales %}
-{% if loop.index != 1 %}
-    $('.language-group.locale-{{ info.slug }}').hide();
-{% endif %}
-    $('#i18nselect').append('<option value="{{ info.slug }}">{{ info.label }}</option>');
-{% endfor %}
+    $('#filtertabs').append('<div class="dropdown pull-right" id="i18nselect">' +
+      '  <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">' +
+      '    <span class="selected">{{ locales|first.label }}</span>' +
+      '    <span class="caret"></span>' +
+      '  </button>' +
+      '  <ul class="dropdown-menu">' + 
+      {% for locale, info in locales %}
+      '    <li{% if loop.first %} class="disabled"{% endif %}>' +
+      '      <a data-locale="{{ info.slug }}">{{ info.label }}</a> '+
+      '    </li>' +
+      {% endfor %}
+      '  </ul>' +
+      '</div>');
+    
+    $('.language-group').hide();
+    $('.language-group.locale-{{ locales|first.slug }}').show();
 
-    $('#i18nselect').change(function() {
+    $('#i18nselect ul.dropdown-menu a').click(function(e, force) {
+        e.preventDefault();
+        var el = $(this);
+
+        locale = el.data('locale');
+
+        if(el.parent().hasClass('disabled') && !force) {
+            return false;
+        }
+
+        $('#i18nselect button .selected').html(el.text());
+
+        el.parent()
+            .addClass('disabled')
+            .siblings()
+            .removeClass('disabled');
+
         $('.language-group').hide();
-        $('.language-group.locale-' + $('#i18nselect').val()).show();
+        $('.language-group.locale-' + locale).show();
     });
 });
-
-
-
-
 </script>
+<style type="text/css">
+#i18nselect button {
+    border-radius: 4px 4px 0 0;
+    padding: 5px 12px;
+    line-height: 1.42857;
+    margin-bottom: -1px;
+}
+#i18nselect button a {
+    border: 0;
+    background-color: transparent!important;
+}
+#i18nselect .dropdown-menu > li {
+    margin-left: 0;
+}
+#i18nselect .dropdown-menu > li > a {
+    padding: 3px 20px;
+    color: #333;
+    background-color: transparent;
+    border: 0;
+}
+#i18nselect .dropdown-menu > li > a:hover {
+    background-color: #DDD !important;
+}
+#i18nselect .dropdown-menu > .disabled > a {
+    color: #777;
+    cursor: default;
+}
+#i18nselect .dropdown-menu > .disabled > a:hover {
+    background-color: transparent !important;
+}
+</style>
 {% endif %}
