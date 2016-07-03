@@ -79,16 +79,6 @@ class TranslateExtension extends SimpleExtension
     /**
      * {@inheritdoc}
      */
-    protected function registerBackendControllers()
-    {
-        return [
-        #    '/' => new BackendController(),
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     protected function registerTwigPaths()
     {
         return [
