@@ -60,13 +60,6 @@ abstract class I18nTypeBase extends FieldTypeBase
                 );
         }
     }
-    
-    /**
-     * {@inheritdoc}
-     */
-    public function query(QueryInterface $query, ClassMetadata $metadata)
-    {
-    }
 
     public function persist(QuerySet $queries, $entity, EntityManager $em = null)
     {
@@ -172,20 +165,18 @@ abstract class I18nTypeBase extends FieldTypeBase
 
             if (isset($data[$key . '_translations'])) {
                 $parse = (string) $data[$key . '_translations'];
-                if (substr($parse, 0, 1) == '{') {
+                if (substr($parse, 0, 1) == '{') { # Postgresql adds brackets
                     $parse = substr($parse, 1, -1);
                 }
                 $ids_pairs = explode(',', $parse);
 
                 foreach ($ids_pairs as $fieldKey) {
-                    if ($fieldKey != 'Array') {
-                        $split = explode('_', $fieldKey);
-                        $id = array_pop($split);
-                        $locale = join('_', $split);
-                        
-                        if (is_numeric($id)) {
-                            $ids[$locale] = (int) $id;
-                        }
+                    $split = explode('_', $fieldKey);
+                    $id = array_pop($split);
+                    $locale = join('_', $split);
+                    
+                    if (is_numeric($id)) {
+                        $ids[$locale] = (int) $id;
                     }
                 }
             }
