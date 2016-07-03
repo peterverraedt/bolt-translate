@@ -3,7 +3,7 @@ Translate Extension
 
 ## Setup
 
-1. Install the extension under `extensions/local/verraedt/translate`.
+1. Install the extension, e.g. locally under `extensions/local/verraedt/translate`, and do a database update.
 2. Add the `locales` block to the main configuration with your locales, the first one is the default locale. Do not remove the setting `locale`.
 
         locales:
@@ -92,4 +92,79 @@ Translate Extension
    * `text`
    * `html`
 
-5. Do a database update.
+    Example configuration:
+ 
+        pages:
+            name: Pages
+            singular_name: Page
+            fields:
+                title:
+                    type: text
+                    i18n: true
+                    class: large
+                    group: content
+                slug:
+                    type: slug
+                    uses: title
+                image:
+                    type: image
+                teaser:
+                    type: html
+                    i18n: true
+                    height: 150px
+                body:
+                    type: html
+                    i18n: true
+                    height: 300px
+                template:
+                    type: templateselect
+                    filter: '*.twig'
+
+5. Change the paths used in the theme: Find all occurances of `{{ paths.root }}` and change them to `{{ paths.root }}{{ lang }}/`.
+
+6. Using the administration interface, you can add several translation strings under `http://<website>/bolt/tr` for the default locale (the one specified under `locale` in your configuration). To change translations for the other locales, you can currently manually change the default locale in the configuration file to open the administration interface in the other locales.
+
+7. To translate the menus, you can change the items in the menu to use `route:` instead of `path:`, e.g.:
+
+        main:
+            - label: Home
+              title: This is the first menu item.
+              route: homepage
+              class: first
+            - label: File
+              route: contentlink
+              param:
+                  contenttypeslug: page
+                  slug: entry-1
+              submenu:
+                  - label: Sub 1
+                    route: contentlink
+                    param:
+                        contenttypeslug: page
+                        slug: entry-2
+                  - label: Sub 2
+                    class: menu-item-class
+                    route: contentlink
+                    param:
+                        contenttypeslug: page
+                        slug: entry-3
+                  - label: Sub 3
+                    route: contentlink
+                    param:
+                        contenttypeslug: page
+                        slug: entry-4
+                  - label: Sub 4
+                    class: sub-class
+                    route: contentlink
+                    param:
+                        contenttypeslug: page
+                        slug: entry-5
+            - label: All pages
+              route: contentlisting
+              param:
+                  contenttypeslug: pages
+            - label: The Bolt site
+              link: http://bolt.cm
+              class: last
+
+   Translation for `label` and `title` is supported, just add those items in the translation files.
