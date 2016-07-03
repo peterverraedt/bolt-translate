@@ -23,6 +23,7 @@ Translate Extension
                 path: '/{_locale}/{contenttypeslug}/{slug}'
                 defaults:
                     _controller: i18n_controller.frontend:record
+                    _locale: nl
                 requirements:
                     contenttypeslug: i18n_controller.requirement:anyContentType
                     _locale: i18n_controller.requirement:anyLocale
@@ -46,6 +47,7 @@ Translate Extension
             path: /{_locale}
             defaults:
                 _controller: i18n_controller.frontend:homepage
+                _locale: nl
             requirements:
                 _locale: i18n_controller.requirement:anyLocale
      
@@ -53,6 +55,7 @@ Translate Extension
             path: /{_locale}/search
             defaults:
                 _controller: i18n_controller.frontend:search
+                _locale: nl
             requirements:
                 _locale: i18n_controller.requirement:anyLocale
      
@@ -60,6 +63,7 @@ Translate Extension
             path: /{_locale}/preview/{contenttypeslug}
             defaults:
                 _controller: i18n_controller.frontend:preview
+                _locale: nl
             requirements:
                 contenttypeslug: i18n_controller.requirement:anyContentType
                 _locale: i18n_controller.requirement:anyLocale
@@ -68,6 +72,7 @@ Translate Extension
             path: '/{_locale}/{contenttypeslug}/{slug}'
             defaults:
                 _controller: i18n_controller.frontend:record
+                _locale: nl
             requirements:
                 contenttypeslug: i18n_controller.requirement:anyContentType
                 _locale: i18n_controller.requirement:anyLocale
@@ -76,6 +81,7 @@ Translate Extension
             path: /{_locale}/{taxonomytype}/{slug}
             defaults:
                 _controller: i18n_controller.frontend:taxonomy
+                _locale: nl
             requirements:
                 taxonomytype: i18n_controller.requirement:anyTaxonomyType
                 _locale: i18n_controller.requirement:anyLocale
@@ -84,6 +90,7 @@ Translate Extension
             path: /{_locale}/{contenttypeslug}
             defaults:
                 _controller: i18n_controller.frontend:listing
+                _locale: nl
             requirements:
                 contenttypeslug: i18n_controller.requirement:pluralContentTypes
                 _locale: i18n_controller.requirement:anyLocale
