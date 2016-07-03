@@ -88,15 +88,14 @@ Translate Extension
                 contenttypeslug: i18n_controller.requirement:pluralContentTypes
                 _locale: i18n_controller.requirement:anyLocale
 
-4. Add `i18n: true` to each field that should be translated. Currently supported fields:
-   * `text`
-   * `html`
+4. For each contenttype that needs (partial) translation, add `class: \Bolt\Extension\Verraedt\Translate\Legacy\I18nContent # To be removed in Bolt v4.0` to the contenttype and add `i18n: true` to each field that should be translated. See below for currently supported fields.
 
     Example configuration:
  
         pages:
             name: Pages
             singular_name: Page
+            class: \Bolt\Extension\Verraedt\Translate\Legacy\I18nContent # To be removed in Bolt v4.0 
             fields:
                 title:
                     type: text
@@ -168,3 +167,8 @@ Translate Extension
               class: last
 
    Translation for `label` and `title` is supported, just add those items in the translation files.
+
+## Currently supported fields 
+
+   * `text`
+   * `html`

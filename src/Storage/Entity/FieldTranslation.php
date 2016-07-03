@@ -88,7 +88,6 @@ class FieldTranslation extends Entity
 
     public function __toString()
     {
-        dump('called');
         return (string) $this->getValue();
     }
 

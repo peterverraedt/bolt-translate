@@ -154,22 +154,7 @@ abstract class I18nTypeBase extends FieldTypeBase
         // If entity
         $i18n_enabled = isset($this->mapping['data']) && isset($this->mapping['data']['i18n']) && $this->mapping['data']['i18n'];
 
-        if (isset($data[$key . '_translations'])) {
-            $i18n_enabled = TRUE; // All Fine
-        }
-        elseif (is_null($entity->getContenttype())) {
-            // XXX Vuile hack (TM) XXX
-            $backtrace = debug_backtrace()[1];
-            if ($backtrace['class'] == 'Bolt\Legacy\Content' && $backtrace['function'] == 'setValue') {
-                $object = $backtrace['object'];
-
-                $entity->setContenttype($object->contenttype['tablename']);
-                $entity->setId($object->id);
-            }
-            // XXX Vuile hack (TM) XXX
-        }
-
-        // If mapping is missing, but contenntype is present, find out i18n_enabled using contenttype and global configuration
+        // If $this->mapping['data'] is missing, but contenttype is present, find out i18n_enabled using contenttype and global configuration
         if (!$i18n_enabled && !isset($this->mapping['data']) && !is_null($entity->getContenttype())) {
             $contenttype_info = $app['config']->get('contenttypes/' . $entity->getContenttype(), NULL);
             $i18n_enabled = isset($contenttype_info['fields'][$key]['i18n']) && $contenttype_info['fields'][$key]['i18n'];
@@ -204,9 +189,9 @@ abstract class I18nTypeBase extends FieldTypeBase
                     }
                 }
             }
-            else {
+            elseif (isset($data['id']) && !is_null($entity->getContenttype())) {
                 // Try to lookup from repo
-                $ids = $repo->getExistingFields($entity->getId(), $entity->getContenttype(), $key);
+                $ids = $repo->getExistingFields($data['id'], $entity->getContenttype(), $key);
             }
         
             $values = [];
