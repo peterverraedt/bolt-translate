@@ -59,7 +59,12 @@ class I18nFrontend extends Frontend
             // Fallback if locale instead of slug is used
             if (!$found && isset($all_locales[$_locale])) {
                 $this->app['config']->set('general/locale', $_locale);
-                //return $this->app->redirect($all_locales[$_locale]['slug']);
+                if ($request->getMethod() == 'GET') {
+                    $uri = str_replace('/' . $_locale . '/', '/' . $all_locales[$_locale]['slug'] . '/', $request->getRequestUri());
+                    if ($uri != $request->getRequestUri()) {
+                        return $this->app->redirect($uri);
+                    }
+                }
             }
 
             if ($found) {
