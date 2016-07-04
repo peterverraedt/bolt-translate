@@ -60,7 +60,7 @@ class I18nFrontend extends Frontend
             if (!$found && isset($all_locales[$_locale])) {
                 $this->app['config']->set('general/locale', $_locale);
                 if ($request->getMethod() == 'GET') {
-                    $uri = str_replace('/' . $_locale . '/', '/' . $all_locales[$_locale]['slug'] . '/', $request->getRequestUri());
+                    $uri = str_replace('/' . $_locale, '/' . $all_locales[$_locale]['slug'], $request->getRequestUri());
                     if ($uri != $request->getRequestUri()) {
                         return $this->app->redirect($uri);
                     }
@@ -143,5 +143,17 @@ class I18nFrontend extends Frontend
             return $redirect;
         }
         return parent::search($request, $contenttypes);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function staticTemplate(Request $request, $template, $_locale = '')
+    {
+        $redirect = $this->setLanguage($_locale, $request);
+        if ($redirect) {
+            return $redirect;
+        }
+        return parent::template($template);
     }
 }

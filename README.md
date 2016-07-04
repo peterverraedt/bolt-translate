@@ -126,7 +126,7 @@ Translate Extension
                     type: templateselect
                     filter: '*.twig'
 
-5. Change the paths used in the theme: Find all occurances of `{{ paths.root }}` and change them to `{{ paths.root }}{{ lang }}/`.
+5. Change the paths used in the theme: Find all occurances of `{{ paths.root }}` and change them to `{{ paths.root }}{{ lang() }}/`.
 
 6. Using the administration interface, you can add several translation strings under `http://<website>/bolt/tr` for the default locale (the one specified under `locale` in your configuration). To change translations for the other locales, you can currently manually change the default locale in the configuration file to open the administration interface in the other locales.
 

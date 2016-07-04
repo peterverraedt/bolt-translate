@@ -90,4 +90,30 @@ class TranslateExtension extends SimpleExtension
             'field_translation' => FieldTranslation::class,
             ];
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerTwigFunctions() 
+    {
+        return [
+            'lang' => 'getLocaleSlug',
+            ];
+    }
+
+    public function getLocaleSlug()
+    {
+        $app = ResourceManager::getApp();
+
+        $all_locales = $app['config']->get('general/locales', NULL);
+        $current_locale = $app['config']->get('general/locale', 'en_GB');
+
+        if (!isset($all_locales[$current_locale])) {
+            $current_locale = array_keys($all_locales)[0];
+        }
+        if (isset($all_locales[$current_locale]['slug'])) {
+            return $all_locales[$current_locale]['slug'];
+        }
+        return 'en';
+    }
 }
