@@ -2,6 +2,7 @@
 
 namespace Bolt\Extension\Verraedt\Translate;
 
+use Bolt\Configuration\ResourceManager;
 use Bolt\Extension\SimpleExtension;
 use Bolt\Extension\DatabaseSchemaTrait;
 use Silex\Application;
