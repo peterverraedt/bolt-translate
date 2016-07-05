@@ -16,14 +16,14 @@ Translate Extension
 
 3. Edit `routing.yml` in the following way:
    * Replace all occurances of `controller.frontend` by `i18n_controller.frontend`.
-   * Add the parameter `{_locale}` to each path, and add the requirement `_locale: i18n_controller.requirement:anyLocale` to each item:
+   * Add the parameter `{_locale}` to each path, and add the requirement `_locale: i18n_controller.requirement:anyLocale` to each item. Set the default value for `_locale` to `dynamic`.
 
             [...]
             contentlink:
                 path: '/{_locale}/{contenttypeslug}/{slug}'
                 defaults:
                     _controller: i18n_controller.frontend:record
-                    _locale: nl
+                    _locale: dynamic
                 requirements:
                     contenttypeslug: i18n_controller.requirement:anyContentType
                     _locale: i18n_controller.requirement:anyLocale
@@ -47,7 +47,7 @@ Translate Extension
             path: /{_locale}
             defaults:
                 _controller: i18n_controller.frontend:homepage
-                _locale: nl
+                _locale: dynamic
             requirements:
                 _locale: i18n_controller.requirement:anyLocale
      
@@ -55,7 +55,7 @@ Translate Extension
             path: /{_locale}/search
             defaults:
                 _controller: i18n_controller.frontend:search
-                _locale: nl
+                _locale: dynamic
             requirements:
                 _locale: i18n_controller.requirement:anyLocale
      
@@ -63,7 +63,7 @@ Translate Extension
             path: /{_locale}/preview/{contenttypeslug}
             defaults:
                 _controller: i18n_controller.frontend:preview
-                _locale: nl
+                _locale: dynamic
             requirements:
                 contenttypeslug: i18n_controller.requirement:anyContentType
                 _locale: i18n_controller.requirement:anyLocale
@@ -72,7 +72,7 @@ Translate Extension
             path: '/{_locale}/{contenttypeslug}/{slug}'
             defaults:
                 _controller: i18n_controller.frontend:record
-                _locale: nl
+                _locale: dynamic
             requirements:
                 contenttypeslug: i18n_controller.requirement:anyContentType
                 _locale: i18n_controller.requirement:anyLocale
@@ -81,7 +81,7 @@ Translate Extension
             path: /{_locale}/{taxonomytype}/{slug}
             defaults:
                 _controller: i18n_controller.frontend:taxonomy
-                _locale: nl
+                _locale: dynamic
             requirements:
                 taxonomytype: i18n_controller.requirement:anyTaxonomyType
                 _locale: i18n_controller.requirement:anyLocale
@@ -90,7 +90,7 @@ Translate Extension
             path: /{_locale}/{contenttypeslug}
             defaults:
                 _controller: i18n_controller.frontend:listing
-                _locale: nl
+                _locale: dynamic
             requirements:
                 contenttypeslug: i18n_controller.requirement:pluralContentTypes
                 _locale: i18n_controller.requirement:anyLocale
