@@ -12,6 +12,7 @@ use Bolt\Extension\Verraedt\Translate\Controller\I18nRequirement;
 use Bolt\Extension\Verraedt\Translate\Storage\Database\Schema\Table\FieldTranslation;
 use Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nTextType;
 use Bolt\Extension\Verraedt\Translate\Storage\Field\Type\I18nHtmlType;
+use Bolt\Extension\Verraedt\Translate\Routing\I18nUrlGeneratorWrapper;
 use Bolt\Extension\Verraedt\Translate\Menu\I18nMenuBuilder;
 
 /**
@@ -28,6 +29,7 @@ class TranslateExtension extends SimpleExtension
      */
     protected function registerServices(Application $app)
     {
+        // Add services to serve i18n content
         $app['i18n_controller.frontend'] = $app->share(
             function ($app) {
                 $frontend = new I18nFrontend();
@@ -43,6 +45,7 @@ class TranslateExtension extends SimpleExtension
             }
         );
 
+        // Override fields with i18n-aware variants
         $app['storage.typemap'] = array_merge(
             $app['storage.typemap'],
             [
@@ -64,12 +67,37 @@ class TranslateExtension extends SimpleExtension
             )
         );
 
+        // Add translated fields table and entities/repository
         $this->extendDatabaseSchemaServices();
 
         $app['storage']->getMapper()->setDefaultAlias('bolt_field_translation', 'Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation');
         $app['storage']->setRepository('Bolt\Extension\Verraedt\Translate\Storage\Entity\FieldTranslation', 'Bolt\Extension\Verraedt\Translate\Storage\Repository\FieldTranslationRepository');
 
+        // Support translation of menu items
         $app['menu'] = new I18nMenuBuilder($app);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function boot(Application $app)
+    {
+        // Ensure _locale is always set
+        $default_locale = $app['config']->get('general/locale', 'en_GB');
+        $all_locales = $app['config']->get('general/locales', NULL);
+        
+        $slug = 'en';
+        if (isset($all_locales[$default_locale]['slug'])) {
+            $slug = $all_locales[$default_locale]['slug'];
+        }
+        elseif ($all_locales) {
+            $locale = array_keys($all_locales)[0];
+            if (isset($all_locales[$locale]['slug'])) {
+                $slug = $all_locales[$locale]['slug'];
+            }
+        }
+
+        $app['url_generator']->getContext()->setParameters(['_locale' => $slug]);
     }
 
     /**
