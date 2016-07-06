@@ -6,6 +6,7 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Bolt\Controller\Frontend;
+use Bolt\Extension\Verraedt\Translate\TranslateExtension;
 
 class I18nFrontend extends Frontend 
 {
@@ -50,25 +51,20 @@ class I18nFrontend extends Frontend
             $found = FALSE;
             foreach ($all_locales as $id => $info) {
                 if ($info['slug'] == $_locale) {
-                    $this->app['config']->set('general/locale', $id);
-                    $this->app['locale'] = $id;
+                    TranslateExtension::setLocale($this->app, $id);
                     $found = TRUE;
                 }
             }
 
             // Fallback if locale instead of slug is used
             if (!$found && isset($all_locales[$_locale])) {
-                $this->app['config']->set('general/locale', $_locale);
                 if ($request->getMethod() == 'GET') {
                     $uri = str_replace('/' . $_locale, '/' . $all_locales[$_locale]['slug'], $request->getRequestUri());
                     if ($uri != $request->getRequestUri()) {
                         return $this->app->redirect($uri);
                     }
                 }
-            }
-
-            if ($found) {
-                $this->app->initLocale();
+                TranslateExtension::setLocale($this->app, $_locale);
             }
         }
     }

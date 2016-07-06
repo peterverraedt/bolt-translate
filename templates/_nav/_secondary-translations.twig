@@ -1,0 +1,30 @@
+{% set tr_menu = app['menu.admin'].get('translations') %}
+{% set sub = [] %}
+
+{# Add the available extensions that have added a menu-item. #}
+{% for submenu in tr_menu.children %}
+{% if sub %}
+{% set sub = sub|merge(['-']) %}
+{% endif %}
+{% set sub = sub|merge([
+    {
+        icon: submenu.icon|default('fa:flag'),
+        label: submenu.label,
+        link: submenu.uri,
+        isallowed: submenu.permission
+    }
+]) %}
+{% for language in submenu.children %}
+{% set sub = sub|merge([
+    {
+        icon: language.icon|default('fa:empty'),
+        label: language.label,
+        link: language.uri,
+        isallowed: language.permission
+    }
+]) %}
+{% endfor %}
+
+{% endfor %}
+
+{{ nav.submenu('fa:flag', __('general.phrase.translations'), sub, (page_nav == 'Settings/Translations')) }}

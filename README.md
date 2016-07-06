@@ -179,3 +179,7 @@ Translate Extension
 
    * `text`
    * `html`
+
+## Coding conventions
+   * `$_locale`: slug to indicate a certain locale (e.g. `en`)
+   * `$locale`: actual locale (e.g. `en_GB`)
